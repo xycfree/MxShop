@@ -13,11 +13,22 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url
+from django.conf.urls import url, include
 # from django.contrib import admin
 import xadmin
+# from goods.views_base import GoodsListView
+from goods.views import GoodsListView, GoodsListViewSet
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+
+# 配置goods的url
+router.register(r'goods1', GoodsListViewSet, base_name='goods')
+
 
 urlpatterns = [
-    # url(r'^admin/', admin.site.urls),
+    url(r'^', include(router.urls)),
     url(r'^xadmin/', xadmin.site.urls),
+    # url(r'^goods/', GoodsListView.as_view(), name='goods_list')
+    url(r'^goods/', GoodsListView.as_view(), name='goods_list')
 ]

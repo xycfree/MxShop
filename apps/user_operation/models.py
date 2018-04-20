@@ -1,14 +1,9 @@
 from datetime import datetime
 
-# try:
-#     from django.contrib.auth import get_user_model
-#     User = get_user_model()
-# except:
-#     from django.contrib.auth.models import User
-from django.db import models
 # from django.contrib.auth import get_user_model
-# User = get_user_model()
-# Create your models here.
+# User = get_user_model()  # python3.6正常, python3.5不能正常使用
+
+from django.db import models
 from goods.models import Goods
 from users.models import UserProfile as User
 
