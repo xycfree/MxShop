@@ -3,12 +3,14 @@
 # @Date    : 2018/4/20 10:59
 # Author: xycfree
 # @Descript:
-from rest_framework import request, mixins, viewsets
+from rest_framework import request, mixins, viewsets, filters
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.request import Request
+
+from goods.filter import GoodsFilter
 from goods.models import Goods
 from .serializers import GoodsSerializer
 from django_filters.rest_framework import DjangoFilterBackend
@@ -52,22 +54,26 @@ class GoodsListView(ListAPIView):
     serializer_class = GoodsSerializer
     pagination_class = GoodsPagination
 
-    def get_queryset(self):
-        shop_price = self.request.query_params.get('shop_price', 0)
-        self.queryset = Goods.objects.filter(shop_price__gt=float(shop_price)).order_by('-shop_price')
-        return self.queryset
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('category', 'name')
+    # def get_queryset(self):
+    #     shop_price = self.request.query_params.get('shop_price', 0)
+    #     self.queryset = Goods.objects.filter(shop_price__gt=float(shop_price)).order_by('-shop_price')
+    #     return self.queryset
 
 
 class GoodsListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    queryset = Goods.objects.all()
+    queryset = Goods.objects.all()  # queryset属性
     serializer_class = GoodsSerializer
     pagination_class = GoodsPagination
 
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)  # 使用过滤器
+    filter_class = GoodsFilter
+    # filter_fields = ('name',)  # 定义需要过滤的字段
+    search_fields = ('name',)
 
 
-
-    def get_queryset(self):
-        shop_price = self.request.query_params.get('shop_price', 0)
-        self.queryset = Goods.objects.filter(shop_price__gt=float(shop_price)).order_by('-shop_price')
-        return self.queryset
+    # def get_queryset(self):  # get_queryset方法, 过滤函数
+    #     shop_price = self.request.query_params.get('shop_price', 0)
+    #     self.queryset = Goods.objects.filter(shop_price__gt=float(shop_price)).order_by('-shop_price')
+    #     return self.queryset
