@@ -18,3 +18,4 @@ class GoodsFilter(django_filters.rest_framework.FilterSet):
     class Meta:
         model = Goods
         fields = ['name', 'price_min', 'price_max']
+        # ording = ('-shop_price', )

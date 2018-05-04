@@ -45,6 +45,7 @@ logs/*
 download/*
 /logs/*
 *.log
+*.log.*
 
 /.idea/*
 .idea

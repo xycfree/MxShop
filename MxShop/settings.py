@@ -9,11 +9,12 @@ https://docs.djangoproject.com/en/1.10/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.10/ref/settings/
 """
-
+import logging
+import logging.config
 import os
 import sys
-import pymysql
-pymysql.install_as_MySQLdb()
+from datetime import datetime
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -21,6 +22,14 @@ sys.path.insert(0, BASE_DIR)
 sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 sys.path.insert(0, os.path.join(BASE_DIR, 'extra_apps'))
 
+log_dir = os.path.join(BASE_DIR, 'logs')
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)  # 判断路径是否存在，不存在则创建路径
+# log_file = 'info-{}.log'.format(datetime.now().strftime('%Y-%m-%d'))  # 文件名
+# log_err_file = 'error-{}.log'.format(datetime.now().strftime('%Y-%m-%d'))
+
+log_file = 'info.log'
+log_err_file = 'error.log'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
@@ -42,6 +51,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # 'django.contrib.sites',
+    'django.contrib.admin',  # 解决doesn't declare an explicit app_label
+
     'goods.apps.GoodsConfig',
     'users.apps.UsersConfig',
     'trade.apps.TradeConfig',
@@ -56,6 +69,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',  # 解决跨域请求的问题 pip install django-cors-headers
     'rest_framework.authtoken',
+
+
 
 ]
 
@@ -143,8 +158,12 @@ DATABASES = {
         'PASSWORD': "root",
         'HOST': "127.0.0.1",
         "PORT": 3306,
-        'OPTIONS': {'init_command': 'SET storage_engine=INNODB;',
-                    'charset': 'utf8',}
+        'OPTIONS': {
+            'init_command': 'SET storage_engine=INNODB;',
+            'charset': 'utf8',
+            # 'isolation_level': 'read committed',
+            'isolation_level': None,
+                    }
 
     }
 }
@@ -179,7 +198,7 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = False   # 默认是Ture，时间是utc时间，由于我们要用本地时间，所用手动修改为false！！！！
 
-
+# 自定义用户验证
 AUTHENTICATION_BACKENDS = (
     'users.views.CustomBackend',
 )
@@ -196,8 +215,96 @@ STATICFILES_DIRS = (
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 
+import datetime
+JWT_AUTH = {
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),  # 也可以设置seconds=30
+    'JWT_AUTH_HEADER_PREFIX': 'JWT',  # JWT跟前端保持一致，比如“token”这里设置成JWT
+}
+
+
+
 REST_FRAMEWORK = {
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     # 'PAGE_SIZE': 10,
-    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',)
+    # 'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',)
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+    )
 }
+
+
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            'format': '%(asctime)s [%(name)s:%(lineno)d] [%(levelname)s]- %(message)s'
+        },
+        'standard': {
+            'format': '%(asctime)s [%(threadName)s:%(thread)d] [%(name)s:%(lineno)d] [%(levelname)s]- %(message)s'
+        },
+    },
+
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "DEBUG",
+            "formatter": "simple",
+            "stream": "ext://sys.stdout"
+        },
+        'error': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            "formatter": "standard",
+            'filename': os.path.join(log_dir, log_err_file),
+            'mode': 'w+',
+            'maxBytes': 1024 * 1024 * 50,
+            'backupCount': 10,
+            "encoding": "utf8",
+        },
+
+        "default": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "level": "INFO",
+            "formatter": "standard",
+            "filename": os.path.join(log_dir, log_file),
+            'mode': 'w+',
+            "maxBytes": 1024 * 1024 * 50,  # 5 MB
+            "backupCount": 10,
+            "encoding": "utf8"
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html': True,
+        },
+        # 'filter': {
+        # },
+    },
+
+    "loggers": {
+        "": {
+            "level": "DEBUG",
+            "handlers": ["console"],
+            "propagate": False,  # this tells logger to send logging message # to its parent (will send if set to True)
+        },
+        'django.db': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+
+    "root": {
+        'handlers': ['default', 'console', 'error'],
+        'level': "DEBUG",
+        'propagate': False
+    }
+}
+
+# 手机号码正则表达式
+REGEX_MOBILE = "^1[3589]\d{9}$|^147\d{8}$|^176\d{8}$"

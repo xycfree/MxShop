@@ -1,0 +1,66 @@
+Premissions
+顾名思义就是权限管理，用来给 ViewSet 设置权限，使用 premissions 可以方便的设置不同级别的权限：
+
+全局权限控制
+ViewSet 的权限控制
+Method 的权限
+Object 的权限
+被 premission 拦截的请求会有如下的返回结果：
+
+当用户已登录，但是被 premissions 限制，会返回 HTTP 403 Forbidden
+当用户未登录，被 premissions 限制会返回 HTTP 401 Unauthorized
+默认的权限
+rest_framework 中提供了七种权限
+
+AllowAny # 无限制
+IsAuthenticated # 登陆用户
+IsAdminUser # Admin 用户
+IsAuthenticatedOrReadOnly # 非登录用户只读
+DjangoModelPermissions # 以下都是根据 Django 的 ModelPremissions
+DjangoModelPermissionsOrAnonReadOnly
+DjangoObjectPermissions
+全局权限控制
+在 settings.py 中可以设置全局默认权限
+
+# settings.py
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.AllowAny',
+    ),
+}
+ViewSet 的权限
+可以设置 permission_classes 的类属性来给 viewset 设定权限，restframework 会检查元组内的每一个 premission，必须要全部通过才行。
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    # 设置权限，是一个元组
+    permission_classes = (permissions.IsAuthenticated,)
+自定义权限
+Premissions 可以非常方便的定制，比如我就自己写了一个只允许 owner 编辑的权限
+
+# myproject/myapp/premissions.py
+
+#! /usr/bin/env python
+# -*- coding: utf-8
+from __future__ import unicode_literals, absolute_import
+
+from rest_framework import permissions
+
+
+class IsOwnerOrReadOnly(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        """针对每一次请求的权限检查"""
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+    def has_object_permission(self, request, view, obj):
+        """针对数据库条目的权限检查，返回 True 表示允许"""
+        # 允许访问只读方法
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        # 非安全方法需要检查用户是否是 owner
+        return obj.owner == request.user
