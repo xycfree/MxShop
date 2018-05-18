@@ -24,7 +24,7 @@ from MxShop.settings import MEDIA_ROOT
 from goods.views import index, GoodsListView, GoodsListViewSet, CategoryViewset, HotSearchsViewset, BannerViewset, IndexCategoryViewset
 from rest_framework.routers import DefaultRouter
 
-from user_operation.views import UserFavViewset
+from user_operation.views import UserFavViewset, LeavingMessageViewset, AddressViewset
 from users.views import UserViewset, SmsCodeViewset
 
 router = DefaultRouter()
@@ -38,17 +38,21 @@ router.register(r'indexgoods', IndexCategoryViewset, base_name='index')
 router.register(r'users', UserViewset, base_name="users")
 router.register(r'sms', SmsCodeViewset, base_name="sms")
 router.register(r'userfavs', UserFavViewset, base_name="userfavs")
+router.register(r'messages', LeavingMessageViewset, base_name="messages")
+router.register(r'address', AddressViewset, base_name="address")
 
 
 urlpatterns = [
     url(r'^', include(router.urls)),
+    # url(r'^api/', include(router.urls, namespace='api')),
     url(r'^index/', index, name='index'),
     url(r'^xadmin/', xadmin.site.urls),
     # url(r'^goods/', GoodsListView.as_view(), name='goods_list')
     url(r'^goods/', GoodsListView.as_view(), name='goods_list'),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^api-token-auth/', views.obtain_auth_token),
-    url(r'^jwt-auth/', obtain_jwt_token),
+    # url(r'^jwt-auth/', obtain_jwt_token),
+    url(r'^login/', obtain_jwt_token),
     url(r'^media/(?P<path>.*)$', serve, {"document_root": MEDIA_ROOT}),
 
 ]

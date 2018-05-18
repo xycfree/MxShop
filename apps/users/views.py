@@ -93,13 +93,24 @@ class UserViewset(CreateModelMixin, mixins.UpdateModelMixin, mixins.RetrieveMode
     authentication_classes = (JSONWebTokenAuthentication, authentication.SessionAuthentication)
 
     def get_serializer_class(self):
+        """ 这里需要动态选择用哪个序列化方式
+            UserRegSerializer（用户注册），只返回username和mobile，会员中心页面需要显示更多字段，所以要创建一个UserDetailSerializer
+            问题又来了，如果注册的使用userdetailSerializer，又会导致验证失败，所以需要动态的使用serializer
+        """
         if self.action == 'retrieve':
+            log.debug("获取用户详情...")
             return UserDetailSerializer
         elif self.action == 'create':
+            log.debug("注册新用户...")
             return UserRegSerializer
         return UserDetailSerializer
 
     def get_permissions(self):
+        """ 这里需要动态权限配置
+            #1.用户注册的时候不应该有权限限制
+            #2.当想获取用户详情信息的时候，必须登录才行
+        """
+        log.debug('验证用户权限...')
         if self.action == 'retrieve':
             return [permissions.IsAuthenticated()]
         elif self.action == 'create':
@@ -123,8 +134,16 @@ class UserViewset(CreateModelMixin, mixins.UpdateModelMixin, mixins.RetrieveMode
         return Response(re_dict, status=status.HTTP_201_CREATED, headers=headers)
 
     def get_object(self):
+        """#虽然继承了Retrieve可以获取用户详情，但是并不知道用户的id，所有要重写get_object方法
+        #重写get_object方法，就知道是哪个用户了"""
         return self.request.user
 
     def perform_create(self, serializer):
         return serializer.save()
 
+"""
+    继承mixins.RetrieveModelMixin   -->>获取用户信息
+    重写get_object                              -->>获取登录的用户
+    get_permissions                           -->>动态权限分配
+    get_serializer_class                     -->>动态序列化分配
+"""
