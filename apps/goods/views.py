@@ -76,7 +76,7 @@ class GoodsListView(ListAPIView):
     #     return self.queryset
 
 
-class GoodsListViewSet(CacheResponseMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class GoodsListViewSet(CacheResponseMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,  viewsets.GenericViewSet):
 
     queryset = Goods.objects.all().order_by('-id')  # queryset属性
     """ 不添加排序可能会报以下警告

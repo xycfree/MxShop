@@ -17,6 +17,7 @@ from django.conf.urls import url, include
 # from django.contrib import admin
 from django.views.static import serve
 from rest_framework.authtoken import views
+from rest_framework.documentation import include_docs_urls
 from rest_framework_jwt.views import obtain_jwt_token
 import xadmin
 # from goods.views_base import GoodsListView
@@ -57,5 +58,6 @@ urlpatterns = [
     # url(r'^jwt-auth/', obtain_jwt_token),
     url(r'^login/', obtain_jwt_token),
     url(r'^media/(?P<path>.*)$', serve, {"document_root": MEDIA_ROOT}),
+    url(r'docs/', include_docs_urls(title='MxShop'))
 
 ]
