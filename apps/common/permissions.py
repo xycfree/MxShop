@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Date    : 2018/5/4 18:18
 # Author: xycfree
-# @Descript:
+# @Descript: 自定义用户权限
 
 from rest_framework import permissions
 

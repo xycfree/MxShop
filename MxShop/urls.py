@@ -26,6 +26,7 @@ from rest_framework.routers import DefaultRouter
 
 from user_operation.views import UserFavViewset, LeavingMessageViewset, AddressViewset
 from users.views import UserViewset, SmsCodeViewset
+from trade.views import ShoppingCartViewset, OrderViewset
 
 router = DefaultRouter()
 
@@ -40,6 +41,8 @@ router.register(r'sms', SmsCodeViewset, base_name="sms")
 router.register(r'userfavs', UserFavViewset, base_name="userfavs")
 router.register(r'messages', LeavingMessageViewset, base_name="messages")
 router.register(r'address', AddressViewset, base_name="address")
+router.register(r'shopcarts', ShoppingCartViewset, base_name="shopcarts")
+router.register(r'orders', OrderViewset, base_name="orders")
 
 
 urlpatterns = [

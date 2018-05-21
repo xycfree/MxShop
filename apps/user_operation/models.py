@@ -4,6 +4,8 @@ from datetime import datetime
 # User = get_user_model()  # python3.6正常, python3.5不能正常使用
 
 from django.db import models
+
+from common.storage import FilesStorage
 from goods.models import Goods
 from users.models import UserProfile as User
 
@@ -42,7 +44,9 @@ class UserLeavingMessage(models.Model):
                                        help_text=u"留言类型: 1(留言),2(投诉),3(询问),4(售后),5(求购)")
     subject = models.CharField(max_length=100, default="", verbose_name="主题")
     message = models.TextField(default="", verbose_name="留言内容", help_text="留言内容")
-    file = models.FileField(upload_to="message/images/", verbose_name="上传的文件", help_text="上传的文件")
+    # file = models.FileField(upload_to="message/images/", verbose_name="上传的文件", help_text="上传的文件")
+    file = models.FileField(upload_to="message/images/", verbose_name="上传的文件", help_text="上传的文件",
+                            storage=FilesStorage())  # storage 文件重命名
     add_time = models.DateTimeField(default=datetime.now, verbose_name="添加时间")
 
     class Meta:

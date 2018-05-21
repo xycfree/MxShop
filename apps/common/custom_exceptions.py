@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Date    : 2018/5/9 11:15
 # Author: xycfree
-# @Descript:
+# @Descript: 自定义异常类
 
 from rest_framework import status
 from rest_framework.exceptions import ParseError, NotFound
